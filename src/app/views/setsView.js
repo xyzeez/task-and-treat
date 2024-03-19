@@ -8,7 +8,7 @@ class SetsView extends View {
         <div class="flex flex-row justify-between">
             <h1 class="text-4xl md:text-5xl font-semibold">
                 <span class="font-light block text-3xl md:text-4xl">Welcome back,</span>
-                ${user}!
+                ${user.charAt(0).toUpperCase() + user.slice(1).toLowerCase()}!
             </h1>
             <div class="flex flex-col items-end gap-4 absolute md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
                 <button class="bg-black rounded-xl">
@@ -48,9 +48,8 @@ class SetsView extends View {
                     <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
                         ${set.name.replace(/-/g, ' ')}
                     </h2>
-                    <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">${
-                      set.completed
-                    }/10 done</p>
+                    <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">
+                    ${set.completed}/${set.items.length} done</p>
                 </article>
             </a>`;
       })
