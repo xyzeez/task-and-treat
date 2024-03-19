@@ -8,7 +8,6 @@ const defaultState = {
       name: 'weight-loss',
       emoji: '🚀',
       color: '#FFE6CC',
-      completed: 3,
       items: [
         {
           task: { content: 'Drink 8 glasses of water', completed: true },
@@ -39,7 +38,6 @@ const defaultState = {
       name: 'fitness',
       emoji: '💪',
       color: '#E5FCC2',
-      completed: 5,
       items: [
         {
           task: { content: 'Do 20 push-ups', completed: true },
@@ -70,7 +68,6 @@ const defaultState = {
       name: 'new-habit',
       emoji: '🎯',
       color: '#FFD6A5',
-      completed: 2,
       items: [
         {
           task: { content: 'Read for 30 minutes', completed: false },
@@ -93,7 +90,6 @@ const defaultState = {
       name: 'productivity',
       emoji: '⏰',
       color: '#FFADAD',
-      completed: 1,
       items: [
         {
           task: { content: 'Create a to-do list', completed: false },
@@ -113,7 +109,6 @@ const defaultState = {
       name: 'mindfulness',
       emoji: '🧘',
       color: '#A0C4FF',
-      completed: 4,
       items: [
         {
           task: {
@@ -136,7 +131,6 @@ const defaultState = {
       name: 'self-care',
       emoji: '🛁',
       color: '#CBF0F8',
-      completed: 3,
       items: [
         {
           task: { content: 'Take a relaxing bath', completed: false },
@@ -153,6 +147,24 @@ const defaultState = {
       ],
     },
   ],
+};
+
+const _setCompletedValue = (sets) => {
+  sets.map((set) => {
+    set.completed = _countCompletedTasks(set);
+  });
+};
+
+const _countCompletedTasks = (set) => {
+  const count = set.items.reduce((acc, curr) => {
+    if (curr.task.completed === true) {
+      return acc + 1;
+    } else {
+      return acc;
+    }
+  }, 0);
+
+  return count;
 };
 
 let state = {};
@@ -183,6 +195,8 @@ const init = () => {
   let stateData = getJSON('state');
 
   if (!stateData) stateData = defaultState;
+
+  _setCompletedValue(stateData.sets);
 
   state = stateData;
   setJSON('state', state);
