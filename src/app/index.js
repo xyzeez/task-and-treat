@@ -24,10 +24,14 @@ const controlItem = () => {
   return model.loadItem(id);
 };
 
+const controlBackBtn = () => {
+  SetsView.handleStart(controlStart);
+};
+
 const init = () => {
   StartView.handleStart(controlStart, controlStartForm);
   SetsView.handleStart(controlStart);
-  ItemView.handleStart(controlItem);
+  ItemView.handleStart(controlItem, controlBackBtn);
 };
 
 init();

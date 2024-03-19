@@ -4,7 +4,7 @@ import View from './view';
 class ItemView extends View {
   _generateMarkup = (data) => {
     return `
-    <section class="grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
+      <section class="relative grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
         <div class="flex flex-col gap-4 md:gap-6 px-4 pt-6 mb-8 md:mb-12">
             <div class="flex flex-row items-center gap-4">
                 <span style="background-color: ${
@@ -13,7 +13,7 @@ class ItemView extends View {
                 ${data.emoji}
                 </span>
                 <div class="sm:flex sm:flex-row sm:items-center sm:gap-6 md:gap-10">
-                    <h1 class="relative text-lg font-semibold sm:text-2xl md:text-4xl sm:after:content-[''] sm:after:bg-black sm:after:absolute sm:after:-right-4 md:after:-right-6 sm:after:h-full sm:after:w-[2px]">
+                    <h1 class="relative lowercase first-letter:capitalize text-lg font-semibold sm:text-2xl md:text-4xl sm:after:content-[''] sm:after:bg-black sm:after:absolute sm:after:-right-4 md:after:-right-6 sm:after:h-full sm:after:w-[2px]">
                         ${data.name.replace(/-/g, ' ')}
                     </h1>
                     <p class="text-sm sm:text-base md:text-lg">${
@@ -68,6 +68,11 @@ class ItemView extends View {
                 </ul>
             </div>
         </div>
+        <button id="backBtn" class="absolute right-4 top-6 sm:right-8 sm:top-10">
+            <svg class="w-8 sm:w-10 aspect-square">
+                <use href="${icons}#icon-back"></use>
+            </svg>
+        </button>
       </section>`;
   };
 
@@ -99,16 +104,27 @@ class ItemView extends View {
     this._containerElement.innerHTML = this._generateMarkup(data);
   };
 
-  handleStart = (handler) => {
+  _monitorBackBtn = (handler) => {
+    const btn = document.querySelector('#backBtn');
+
+    btn.addEventListener('click', () => {
+      handler();
+      window.location.hash = '';
+    });
+  };
+
+  handleStart = (handler, btnHandler) => {
     document.addEventListener('DOMContentLoaded', () => {
       if (handler()) {
         this._renderMarkUp(handler());
+        this._monitorBackBtn(btnHandler);
       }
     });
 
     window.addEventListener('hashchange', () => {
       if (handler()) {
         this._renderMarkUp(handler());
+        this._monitorBackBtn(btnHandler);
       }
     });
   };
