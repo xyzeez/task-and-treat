@@ -102,6 +102,7 @@ class ItemView extends View {
   _renderMarkUp = (data) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._generateMarkup(data);
+    this._scrollToTop();
   };
 
   _monitorBackBtn = (handler) => {

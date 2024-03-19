@@ -61,6 +61,7 @@ class SetsView extends View {
   _renderMarkUp = (user, data) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._generateMarkup(user, data);
+    this._scrollToTop();
   };
 
   renderView = (data) => {
