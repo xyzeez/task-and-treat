@@ -31,7 +31,7 @@ const controlFormAddSet = (data) => {
 
 const controlFormAddItem = (data) => {
   model.addSetItem(data);
-  ItemView.handleStart(controlItem, controlBackBtn, controlFormAddItem);
+  ItemView.renderView(controlItem, controlBackBtn, controlFormAddItem);
 };
 
 const controlBackBtn = () => {
