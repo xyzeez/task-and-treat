@@ -11,7 +11,7 @@ const controlStart = () => {
 const controlStartForm = (data) => {
   model.updateState('user', data);
 
-  SetsView.renderView(model.loadState());
+  SetsView.handleStart(controlStart, controlFormAddSet);
 };
 
 const controlItem = () => {
