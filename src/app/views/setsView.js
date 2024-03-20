@@ -1,5 +1,6 @@
 import icons from '../../../assets/icons.svg';
 import View from './view';
+import { clearForm } from '../helpers';
 
 class SetsView extends View {
   _overlayMarkUp = `
@@ -106,7 +107,7 @@ class SetsView extends View {
   _clearForm = () => {
     const form = document.querySelector('#formAddSet');
     const inputs = Array.from(form.querySelectorAll('input[type=text]'));
-    inputs.map((input) => (input.value = ''));
+    clearForm(inputs);
   };
 
   _generateMarkup = (user, data) => {

@@ -9,3 +9,7 @@ export const getJSON = (name) => {
 export const setJSON = (name, data) => {
   localStorage.setItem(name, JSON.stringify(data));
 };
+
+export const clearForm = (inputs) => {
+  inputs.map((input) => (input.value = ''));
+};
