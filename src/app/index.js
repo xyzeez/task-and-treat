@@ -24,13 +24,17 @@ const controlItem = () => {
   return model.loadItem(id);
 };
 
+const controlFormAddSet = (data) => {
+  model.addItem(data);
+};
+
 const controlBackBtn = () => {
   SetsView.handleStart(controlStart);
 };
 
 const init = () => {
   StartView.handleStart(controlStart, controlStartForm);
-  SetsView.handleStart(controlStart);
+  SetsView.handleStart(controlStart, controlFormAddSet);
   ItemView.handleStart(controlItem, controlBackBtn);
 };
 

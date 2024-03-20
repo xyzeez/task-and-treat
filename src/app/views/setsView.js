@@ -3,6 +3,8 @@ import View from './view';
 import { clearForm } from '../helpers';
 
 class SetsView extends View {
+  _formValid = null;
+
   _overlayMarkUp = `
     <div id="overlay" class="bg-black bg-opacity-60 fixed h-screen top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4">
       <form id="formAddSet" class="relative bg-white w-full max-w-[500px] px-4 py-6 sm:px-8 sm:py-8 flex flex-col items-center gap-6 rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] h-fit">
@@ -69,9 +71,10 @@ class SetsView extends View {
     </div>  
     `;
 
-  _renderOverlay = () => {
+  _renderOverlay = (handler) => {
     const section = document.querySelector('#sectionStart');
     section.insertAdjacentHTML('beforeend', this._overlayMarkUp);
+    this._monitorForm(handler);
     this._monitorOverlayClose();
   };
 
@@ -81,10 +84,10 @@ class SetsView extends View {
     overlay.remove();
   };
 
-  _monitorAddSetBtn = () => {
+  _monitorAddSetBtn = (handler) => {
     const btns = Array.from(document.querySelectorAll('.btnAddNewSet'));
     btns.map((btn) => {
-      btn.addEventListener('click', () => this._renderOverlay());
+      btn.addEventListener('click', () => this._renderOverlay(handler));
     });
   };
 
@@ -104,10 +107,84 @@ class SetsView extends View {
     });
   };
 
+  _monitorForm = (handler) => {
+    const form = document.querySelector('#formAddSet');
+
+    form.addEventListener('input', () => {
+      this._clearInputError();
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this._validateForm();
+      if (this._formValid) {
+        const formData = new FormData(form);
+
+        const formDataObject = {};
+
+        formData.forEach((value, key) => {
+          formDataObject[key] = value;
+        });
+
+        handler(formDataObject);
+      }
+    });
+  };
+
+  _validateForm = () => {
+    const titleRegex = /^(?!\s+$).+/;
+    const emojiRegex = /^[\p{Emoji}]{1}$/u;
+
+    const form = document.querySelector('#formAddSet');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.map((input) => {
+      if (input.name === 'title') {
+        this._validateInput(input, titleRegex);
+      }
+
+      if (input.name === 'emoji') {
+        this._validateInput(input, emojiRegex);
+      }
+    });
+  };
+
+  _validateInput = (input, regex) => {
+    const data = input.value;
+
+    if (!data) {
+      this._setInputValid(input, false);
+    }
+
+    if (regex.test(data)) {
+      if (this._formValid === null) {
+        this._formValid = true;
+      }
+      return;
+    } else this._setInputValid(input, false);
+
+    this._formValid = false;
+  };
+
+  _clearInputError = () => {
+    const form = document.querySelector('#formAddSet');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.map((input) => this._setInputValid(input, true));
+    this._formValid = null;
+  };
+
+  _setInputValid = (input, status) => {
+    input.setAttribute('aria-invalid', !status);
+  };
+
   _clearForm = () => {
     const form = document.querySelector('#formAddSet');
     const inputs = Array.from(form.querySelectorAll('input[type=text]'));
+
     clearForm(inputs);
+
+    this._formValid = null;
   };
 
   _generateMarkup = (user, data) => {
@@ -166,11 +243,11 @@ class SetsView extends View {
     return markup;
   };
 
-  _renderMarkUp = (user, data) => {
+  _renderMarkUp = (user, data, handler) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._generateMarkup(user, data);
     this._scrollToTop();
-    this._monitorAddSetBtn();
+    this._monitorAddSetBtn(handler);
   };
 
   renderView = (data) => {
@@ -179,12 +256,12 @@ class SetsView extends View {
     this._renderMarkUp(user, sets);
   };
 
-  handleStart = (handler) => {
+  handleStart = (handler, formHandler) => {
     const { active, user, sets } = handler();
 
     if (!active) return;
 
-    this._renderMarkUp(user, sets);
+    this._renderMarkUp(user, sets, formHandler);
   };
 }
 

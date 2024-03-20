@@ -191,6 +191,10 @@ export const loadItem = (itemName) => {
   return data;
 };
 
+export const addItem = (data) => {
+  console.log(data);
+};
+
 const init = () => {
   let stateData = getJSON('state');
 
