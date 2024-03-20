@@ -26,16 +26,16 @@ const controlItem = () => {
 
 const controlFormAddSet = (data) => {
   model.addItem(data);
-  SetsView.renderView(model.loadState());
+  SetsView.handleStart(controlStart, controlFormAddSet);
 };
 
 const controlFormAddItem = (data) => {
   model.addSetItem(data);
-  ItemView.renderView(controlItem, controlBackBtn, controlFormAddItem);
+  ItemView.handleStart(controlItem, controlBackBtn, controlFormAddItem);
 };
 
 const controlBackBtn = () => {
-  SetsView.handleStart(controlStart);
+  SetsView.handleStart(controlStart, controlFormAddSet);
 };
 
 const init = () => {

@@ -250,12 +250,12 @@ class SetsView extends View {
     this._monitorAddSetBtn(handler);
   };
 
-  renderView = (data) => {
-    const { user, sets } = data;
+  // TODO: Refactor function
+  // renderView = (data, handler) => {
+  //   const { user, sets } = data;
 
-    // TODO: Check for possible error for last ignored argument
-    this._renderMarkUp(user, sets);
-  };
+  //   this._renderMarkUp(user, sets, handler);
+  // };
 
   handleStart = (handler, formHandler) => {
     const { active, user, sets } = handler();
