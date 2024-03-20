@@ -204,7 +204,7 @@ export const addItem = (data) => {
   };
 
   state.sets.push(newItem);
-  _setCompletedValue(stateData.sets);
+  _setCompletedValue(state.sets);
   setJSON('state', state);
 };
 
