@@ -192,7 +192,24 @@ export const loadItem = (itemTitle) => {
 };
 
 export const addItem = (data) => {
-  console.log(data);
+  let { title, emoji, color } = data;
+
+  title = _convertToSlug(title);
+
+  const newItem = {
+    title: title,
+    emoji: emoji,
+    color: color,
+    items: [],
+  };
+
+  state.sets.push(newItem);
+  _setCompletedValue(stateData.sets);
+  setJSON('state', state);
+};
+
+const _convertToSlug = (str) => {
+  return str.trim().toLowerCase().replace(/\s+/g, '-');
 };
 
 const init = () => {
