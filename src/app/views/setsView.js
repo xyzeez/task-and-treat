@@ -195,7 +195,7 @@ class SetsView extends View {
                 <span class="font-light block text-3xl md:text-4xl">Welcome back,</span>
                 ${user.charAt(0).toUpperCase() + user.slice(1).toLowerCase()}!
             </h1>
-            <div class="flex flex-col items-end gap-4 absolute md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
+            <div class="flex flex-col items-end gap-4 fixed md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
                 <button class="btnAddNewSet bg-black rounded-xl">
                     <svg class="aspect-square w-12 md:w-16 p-2">
                         <use href="${icons}#icon-plus"></use>
