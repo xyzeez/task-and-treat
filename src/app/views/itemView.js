@@ -14,7 +14,7 @@ class ItemView extends View {
                 </span>
                 <div class="sm:flex sm:flex-row sm:items-center sm:gap-6 md:gap-10">
                     <h1 class="relative lowercase first-letter:capitalize text-lg font-semibold sm:text-2xl md:text-4xl sm:after:content-[''] sm:after:bg-black sm:after:absolute sm:after:-right-4 md:after:-right-6 sm:after:h-full sm:after:w-[2px]">
-                        ${data.name.replace(/-/g, ' ')}
+                        ${data.title.replace(/-/g, ' ')}
                     </h1>
                     <p class="text-sm sm:text-base md:text-lg">${
                       data.completed

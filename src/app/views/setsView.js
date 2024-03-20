@@ -221,9 +221,9 @@ class SetsView extends View {
     markup += data
       .map((set) => {
         return `
-            <a href="#${
-              set.name
-            }" class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-white">
+            <a 
+              href="#${set.title}"
+              class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-white">
                 <article class="flex p-3 min-[426px]:p-5 md:p-7 justify-between flex-col w-full">
                     <span 
                         style="background-color: ${set.color}" 
@@ -231,7 +231,7 @@ class SetsView extends View {
                         ${set.emoji}
                     </span>
                     <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
-                        ${set.name.replace(/-/g, ' ')}
+                        ${set.title.replace(/-/g, ' ')}
                     </h2>
                     <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">
                     ${set.completed}/${set.items.length} done</p>

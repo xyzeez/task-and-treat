@@ -5,7 +5,7 @@ const defaultState = {
   user: '',
   sets: [
     {
-      name: 'weight-loss',
+      title: 'weight-loss',
       emoji: '🚀',
       color: '#FFE6CC',
       items: [
@@ -35,7 +35,7 @@ const defaultState = {
       ],
     },
     {
-      name: 'fitness',
+      title: 'fitness',
       emoji: '💪',
       color: '#E5FCC2',
       items: [
@@ -65,7 +65,7 @@ const defaultState = {
       ],
     },
     {
-      name: 'new-habit',
+      title: 'new-habit',
       emoji: '🎯',
       color: '#FFD6A5',
       items: [
@@ -87,7 +87,7 @@ const defaultState = {
       ],
     },
     {
-      name: 'productivity',
+      title: 'productivity',
       emoji: '⏰',
       color: '#FFADAD',
       items: [
@@ -106,7 +106,7 @@ const defaultState = {
       ],
     },
     {
-      name: 'mindfulness',
+      title: 'mindfulness',
       emoji: '🧘',
       color: '#A0C4FF',
       items: [
@@ -128,7 +128,7 @@ const defaultState = {
       ],
     },
     {
-      name: 'self-care',
+      title: 'self-care',
       emoji: '🛁',
       color: '#CBF0F8',
       items: [
@@ -179,13 +179,13 @@ export const updateState = (item, data) => {
   setJSON('state', state);
 };
 
-export const loadItem = (itemName) => {
+export const loadItem = (itemTitle) => {
   let data = false;
 
   if (!state.active) return data;
 
   state.sets.map((item) => {
-    if (item.name === itemName) data = item;
+    if (item.title === itemTitle) data = item;
   });
 
   return data;
