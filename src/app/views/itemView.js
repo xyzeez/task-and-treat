@@ -2,6 +2,8 @@ import icons from '../../../assets/icons.svg';
 import View from './view';
 
 class ItemView extends View {
+  _formValid = null;
+
   _generateMarkup = (data) => {
     return `
       <section class="relative grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
@@ -26,7 +28,7 @@ class ItemView extends View {
             </p>
         </div>
 
-        <form class="flex flex-col sm:flex-row sm:items-start items-center gap-2 md:gap-4 px-4 mb-8 md:mb-12">
+        <form id="formAddNewItem" class="flex flex-col sm:flex-row sm:items-start items-center gap-2 md:gap-4 px-4 mb-8 md:mb-12">
           <h2 class="sr-only">Add a new task item</h2>
             <div class="w-full">
                 <div class="relative has-[input[aria-invalid=true]]:pb-6">
@@ -119,6 +121,77 @@ class ItemView extends View {
     this._scrollToTop();
   };
 
+  _monitorForm = (handler) => {
+    const form = document.querySelector('#formAddNewItem');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      this._validateForm();
+
+      if (this._formValid) {
+        const formData = new FormData(form);
+
+        const formDataObject = {};
+
+        formData.forEach((value, key) => {
+          formDataObject[key] = value;
+        });
+
+        handler(formDataObject);
+      }
+    });
+  };
+
+  _validateForm = () => {
+    const regex = /^(?!\s+$).+/;
+
+    const form = document.querySelector('#formAddNewItem');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.map((input) => {
+      this._validateInput(input, regex);
+    });
+  };
+
+  _validateInput = (input, regex) => {
+    const data = input.value;
+
+    if (!data) {
+      this._setInputValid(input, false);
+    }
+
+    if (regex.test(data)) {
+      if (this._formValid === null) {
+        this._formValid = true;
+      }
+      return;
+    } else this._setInputValid(input, false);
+
+    this._formValid = false;
+  };
+
+  _clearInputError = () => {
+    const form = document.querySelector('#formAddNewItem');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.map((input) => this._setInputValid(input, true));
+    this._formValid = null;
+  };
+
+  _setInputValid = (input, status) => {
+    input.setAttribute('aria-invalid', !status);
+  };
+
+  _clearForm = () => {
+    const form = document.querySelector('#formAddNewItem');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    clearForm(inputs);
+
+    this._formValid = null;
+  };
+
   _monitorBackBtn = (handler) => {
     const btn = document.querySelector('#backBtn');
 
@@ -128,18 +201,22 @@ class ItemView extends View {
     });
   };
 
-  handleStart = (handler, btnHandler) => {
+  renderView = (handler, btnHandler, formHandler) => {
+    this._renderMarkUp(handler());
+    this._monitorBackBtn(btnHandler);
+    this._monitorForm(formHandler);
+  };
+
+  handleStart = (handler, btnHandler, formHandler) => {
     document.addEventListener('DOMContentLoaded', () => {
       if (handler()) {
-        this._renderMarkUp(handler());
-        this._monitorBackBtn(btnHandler);
+        this.renderView(handler, btnHandler, formHandler);
       }
     });
 
     window.addEventListener('hashchange', () => {
       if (handler()) {
-        this._renderMarkUp(handler());
-        this._monitorBackBtn(btnHandler);
+        this.renderView(handler, btnHandler, formHandler);
       }
     });
   };

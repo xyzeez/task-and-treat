@@ -208,6 +208,29 @@ export const addItem = (data) => {
   setJSON('state', state);
 };
 
+export const addSetItem = (data) => {
+  let { task, treat } = data;
+
+  task = task.trim();
+  treat = treat.trim();
+
+  const newItem = {
+    task: { content: `${task}`, completed: false },
+    treat: { content: `${treat}`, completed: false },
+  };
+
+  const currSet = window.location.hash.slice(1);
+
+  state.sets.map((set) => {
+    if (set.title === currSet) {
+      set.items.push(newItem);
+    }
+  });
+
+  _setCompletedValue(state.sets);
+  setJSON('state', state);
+};
+
 const _convertToSlug = (str) => {
   return str.trim().toLowerCase().replace(/\s+/g, '-');
 };

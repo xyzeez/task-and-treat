@@ -253,6 +253,7 @@ class SetsView extends View {
   renderView = (data) => {
     const { user, sets } = data;
 
+    // TODO: Check for possible error for last ignored argument
     this._renderMarkUp(user, sets);
   };
 
