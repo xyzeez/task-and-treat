@@ -79,24 +79,38 @@ class ItemView extends View {
   _generateList = (data, type) => {
     let markup = '';
 
-    markup += data
-      .map((item) => {
-        return `
-            <li class="rounded-md text-base bg-white text-left">
-                <label class="group has-[input:checked]:line-through w-full block px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
-                    <input ${
-                      item[type].completed ? 'checked' : ''
-                    }  type="checkbox" class="absolute opacity-0 w-0 h-0" />
-                    <div class="mr-2 md:mr-4 border overflow-hidden p-[2px] border-black w-4 md:w-5 rounded-full aspect-square inline-block">
-                        <div class="w-full aspect-square group-has-[input:checked]:bg-black rounded-full bg-white"></div>                                
-                    </div>
-                    ${item[type].content}
-                </label>
-            </li> `;
-      })
-      .join('');
+    if (data.length) {
+      markup += data
+        .map((item) => {
+          return `
+              <li class="rounded-md text-base bg-white text-left">
+                  <label class="group has-[input:checked]:line-through w-full block px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
+                      <input ${
+                        item[type].completed ? 'checked' : ''
+                      }  type="checkbox" class="absolute opacity-0 w-0 h-0" />
+                      <div class="mr-2 md:mr-4 border overflow-hidden p-[2px] border-black w-4 md:w-5 rounded-full aspect-square inline-block">
+                          <div class="w-full aspect-square group-has-[input:checked]:bg-black rounded-full bg-white"></div>                                
+                      </div>
+                      ${item[type].content}
+                  </label>
+              </li> `;
+        })
+        .join('');
+    } else {
+      markup = this._renderEmptyMarkUp(type);
+    }
 
     return markup;
+  };
+
+  _renderEmptyMarkUp = (type) => {
+    return `
+      <div class="w-[calc(100%-2rem)] mx-auto my-4">
+        <p class="font-medium text-base text-center italic opacity-50">
+          You have no ${type}s 😑, Enter a new ${type} above!
+        </p>
+      </div>
+    `;
   };
 
   _renderMarkUp = (data) => {
