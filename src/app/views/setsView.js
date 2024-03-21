@@ -1,11 +1,79 @@
 import icons from '../../../assets/icons.svg';
+import {
+  validateInput,
+  clearInputError,
+  allTrue,
+  resetForm,
+  capitalizeFirstLetter,
+  scrollToTop,
+} from '../helpers';
 import View from './view';
-import { clearForm } from '../helpers';
 
 class SetsView extends View {
-  _formValid = null;
+  _generateMarkup = (user, data) => {
+    return `
+    <section id="sectionStart" class="bg-ashe flex flex-col gap-10 md:gap-14 xl:gap-32 px-4 py-8 w-full max-w-[1300px] mx-auto md:px-8 lg:px-16 xl:rounded-[30px] xl:my-12 xl:py-16">
+        <div class="flex flex-row justify-between">
+            <h1 class="text-4xl md:text-5xl font-semibold">
+                <span class="font-light block text-3xl md:text-4xl">Welcome back,</span>
+                ${capitalizeFirstLetter(user)}!
+            </h1>
+            <div class="flex flex-col items-end gap-4 fixed md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
+                <button class="btnAddNewSet bg-black rounded-xl">
+                    <svg class="aspect-square w-12 md:w-16 p-2">
+                        <use href="${icons}#icon-plus"></use>
+                    </svg>
+                </button>
+                <p class="hidden md:block text-black">Add a new Set</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-row lg:flex-wrap gap-4">
+            ${this._generateSets(data)}
+            <button class="btnAddNewSet flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] items-center justify-center rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-[#EAEAEA]">
+                <svg class="aspect-square w-16 sm:w-28 bg-[#DFDFDF] rounded-full p-2 sm:p-6 text-black">
+                    <use href="${icons}#icon-plus"></use>
+                </svg>
+            </button>
+        </div>
+    </section>`;
+  };
 
-  _overlayMarkUp = `
+  _generateSets = (data) => {
+    let markup = '';
+
+    markup += data
+      .map((set) => {
+        return `
+            <a 
+              href="#${set.title}"
+              class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-white">
+                <article class="flex p-3 min-[426px]:p-5 md:p-7 justify-between flex-col w-full">
+                    <span 
+                        style="background-color: ${set.color}" 
+                        class="aspect-square self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl w-10 min-[426px]:w-14 md:w-[70px] p-1 rounded-full text-white">
+                        ${set.emoji}
+                    </span>
+                    <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
+                        ${set.title.replace(/-/g, ' ')}
+                    </h2>
+                    <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">
+                    ${set.completed}/${set.items.length} done</p>
+                </article>
+            </a>`;
+      })
+      .join('');
+
+    return markup;
+  };
+
+  _renderMarkUp = (user, data) => {
+    this._clearContainer();
+    this._containerElement.innerHTML = this._generateMarkup(user, data);
+    scrollToTop();
+  };
+
+  _renderOverlayMarkUp = () => {
+    return `
     <div id="overlay" class="bg-black bg-opacity-60 fixed h-screen top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4">
       <form id="formAddSet" class="relative bg-white w-full max-w-[500px] px-4 py-6 sm:px-8 sm:py-8 flex flex-col items-center gap-6 rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] h-fit">
         <h2 class="font-medium self-start text-2xl sm:text-3xl">Add a new set</h2>
@@ -70,25 +138,65 @@ class SetsView extends View {
       </form>
     </div>  
     `;
+  };
 
-  _renderOverlay = (handler) => {
+  _renderOverlay = () => {
     const section = document.querySelector('#sectionStart');
-    section.insertAdjacentHTML('beforeend', this._overlayMarkUp);
-    this._monitorForm(handler);
-    this._monitorOverlayClose();
+    section.insertAdjacentHTML('beforeend', this._renderOverlayMarkUp());
+  };
+
+  _validateForm = () => {
+    const titleRegex = /^(?!\s+$).+/;
+    const emojiRegex = /^[\p{Emoji}]{1}$/u;
+
+    const form = document.querySelector('#formAddSet');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.forEach((input) => {
+      if (input.name === 'title') {
+        validateInput(input, titleRegex, this._formValidArray);
+      }
+
+      if (input.name === 'emoji') {
+        validateInput(input, emojiRegex, this._formValidArray);
+      }
+    });
+  };
+
+  _monitorForm = (handler, renderHandler) => {
+    const form = document.querySelector('#formAddSet');
+
+    form.addEventListener('input', () => {
+      clearInputError(form, this._formValidArray);
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      this._validateForm();
+
+      if (allTrue(this._formValidArray)) {
+        const formData = new FormData(form);
+
+        const formDataObject = {};
+
+        formData.forEach((value, key) => {
+          formDataObject[key] = value;
+        });
+
+        handler(formDataObject);
+
+        resetForm('#formAddSet', 'input[type=text]', this._formValidArray);
+
+        renderHandler();
+      }
+    });
   };
 
   _removeOverlay = () => {
     const overlay = document.querySelector('#overlay');
-    this._clearForm();
+    resetForm('#formAddSet', 'input[type=text]', this._formValidArray);
     overlay.remove();
-  };
-
-  _monitorAddSetBtn = (handler) => {
-    const btns = Array.from(document.querySelectorAll('.btnAddNewSet'));
-    btns.map((btn) => {
-      btn.addEventListener('click', () => this._renderOverlay(handler));
-    });
   };
 
   _monitorOverlayClose = () => {
@@ -107,162 +215,20 @@ class SetsView extends View {
     });
   };
 
-  _monitorForm = (handler) => {
-    const form = document.querySelector('#formAddSet');
-
-    form.addEventListener('input', () => {
-      this._clearInputError();
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this._validateForm();
-      if (this._formValid) {
-        const formData = new FormData(form);
-
-        const formDataObject = {};
-
-        formData.forEach((value, key) => {
-          formDataObject[key] = value;
-        });
-
-        handler(formDataObject);
-      }
+  _monitorAddSetBtn = (handler, renderHandler) => {
+    const btns = Array.from(document.querySelectorAll('.btnAddNewSet'));
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this._renderOverlay();
+        this._monitorForm(handler, renderHandler);
+        this._monitorOverlayClose();
+      });
     });
   };
 
-  _validateForm = () => {
-    const titleRegex = /^(?!\s+$).+/;
-    const emojiRegex = /^[\p{Emoji}]{1}$/u;
-
-    const form = document.querySelector('#formAddSet');
-    const inputs = Array.from(form.querySelectorAll('input'));
-
-    inputs.map((input) => {
-      if (input.name === 'title') {
-        this._validateInput(input, titleRegex);
-      }
-
-      if (input.name === 'emoji') {
-        this._validateInput(input, emojiRegex);
-      }
-    });
-  };
-
-  _validateInput = (input, regex) => {
-    const data = input.value;
-
-    if (!data) {
-      this._setInputValid(input, false);
-    }
-
-    if (regex.test(data)) {
-      if (this._formValid === null) {
-        this._formValid = true;
-      }
-      return;
-    } else this._setInputValid(input, false);
-
-    this._formValid = false;
-  };
-
-  _clearInputError = () => {
-    const form = document.querySelector('#formAddSet');
-    const inputs = Array.from(form.querySelectorAll('input'));
-
-    inputs.map((input) => this._setInputValid(input, true));
-    this._formValid = null;
-  };
-
-  _setInputValid = (input, status) => {
-    input.setAttribute('aria-invalid', !status);
-  };
-
-  _clearForm = () => {
-    const form = document.querySelector('#formAddSet');
-    const inputs = Array.from(form.querySelectorAll('input[type=text]'));
-
-    clearForm(inputs);
-
-    this._formValid = null;
-  };
-
-  _generateMarkup = (user, data) => {
-    return `
-    <section id="sectionStart" class="bg-ashe flex flex-col gap-10 md:gap-14 xl:gap-32 px-4 py-8 w-full max-w-[1300px] mx-auto md:px-8 lg:px-16 xl:rounded-[30px] xl:my-12 xl:py-16">
-        <div class="flex flex-row justify-between">
-            <h1 class="text-4xl md:text-5xl font-semibold">
-                <span class="font-light block text-3xl md:text-4xl">Welcome back,</span>
-                ${user.charAt(0).toUpperCase() + user.slice(1).toLowerCase()}!
-            </h1>
-            <div class="flex flex-col items-end gap-4 fixed md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
-                <button class="btnAddNewSet bg-black rounded-xl">
-                    <svg class="aspect-square w-12 md:w-16 p-2">
-                        <use href="${icons}#icon-plus"></use>
-                    </svg>
-                </button>
-                <p class="hidden md:block text-black">Add a new Set</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-row lg:flex-wrap gap-4">
-            ${this._generateSets(data)}
-            <button class="btnAddNewSet flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] items-center justify-center rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-[#EAEAEA]">
-                <svg class="aspect-square w-16 sm:w-28 bg-[#DFDFDF] rounded-full p-2 sm:p-6 text-black">
-                    <use href="${icons}#icon-plus"></use>
-                </svg>
-            </button>
-        </div>
-    </section>`;
-  };
-
-  _generateSets = (data) => {
-    let markup = '';
-
-    markup += data
-      .map((set) => {
-        return `
-            <a 
-              href="#${set.title}"
-              class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-white">
-                <article class="flex p-3 min-[426px]:p-5 md:p-7 justify-between flex-col w-full">
-                    <span 
-                        style="background-color: ${set.color}" 
-                        class="aspect-square self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl w-10 min-[426px]:w-14 md:w-[70px] p-1 rounded-full text-white">
-                        ${set.emoji}
-                    </span>
-                    <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
-                        ${set.title.replace(/-/g, ' ')}
-                    </h2>
-                    <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">
-                    ${set.completed}/${set.items.length} done</p>
-                </article>
-            </a>`;
-      })
-      .join('');
-
-    return markup;
-  };
-
-  _renderMarkUp = (user, data, handler) => {
-    this._clearContainer();
-    this._containerElement.innerHTML = this._generateMarkup(user, data);
-    this._scrollToTop();
-    this._monitorAddSetBtn(handler);
-  };
-
-  // TODO: Refactor function
-  // renderView = (data, handler) => {
-  //   const { user, sets } = data;
-
-  //   this._renderMarkUp(user, sets, handler);
-  // };
-
-  handleStart = (handler, formHandler) => {
-    const { active, user, sets } = handler();
-
-    if (!active) return;
-
-    this._renderMarkUp(user, sets, formHandler);
+  addHandler = (user, sets, handler, renderHandler) => {
+    this._renderMarkUp(user, sets);
+    this._monitorAddSetBtn(handler, renderHandler);
   };
 }
 

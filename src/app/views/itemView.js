@@ -1,9 +1,16 @@
 import icons from '../../../assets/icons.svg';
+import {
+  getHash,
+  clearHash,
+  validateInput,
+  clearInputError,
+  allTrue,
+  resetForm,
+  scrollToTop,
+} from '../helpers';
 import View from './view';
 
 class ItemView extends View {
-  _formValid = null;
-
   _generateMarkup = (data) => {
     return `
       <section class="relative grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
@@ -86,7 +93,7 @@ class ItemView extends View {
         .map((item) => {
           return `
               <li class="rounded-md text-base bg-white text-left">
-                  <label class="group has-[input:checked]:line-through w-full block px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
+                  <label class="group has-[input:checked]:line-through w-full px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
                       <input ${
                         item[type].completed ? 'checked' : ''
                       }  type="checkbox" class="absolute opacity-0 w-0 h-0" />
@@ -105,6 +112,12 @@ class ItemView extends View {
     return markup;
   };
 
+  _renderMarkUp = (data) => {
+    this._clearContainer();
+    this._containerElement.innerHTML = this._generateMarkup(data);
+    scrollToTop();
+  };
+
   _renderEmptyMarkUp = (type) => {
     return `
       <div class="w-[calc(100%-2rem)] mx-auto my-4">
@@ -115,21 +128,30 @@ class ItemView extends View {
     `;
   };
 
-  _renderMarkUp = (data) => {
-    this._clearContainer();
-    this._containerElement.innerHTML = this._generateMarkup(data);
-    this._scrollToTop();
+  _validateForm = () => {
+    const regex = /^(?!\s+$).+/;
+
+    const form = document.querySelector('#formAddNewItem');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.forEach((input) => {
+      validateInput(input, regex, this._formValidArray);
+    });
   };
 
-  _monitorForm = (handler) => {
+  _monitorForm = (handler, renderHandler) => {
     const form = document.querySelector('#formAddNewItem');
+
+    form.addEventListener('input', () => {
+      clearInputError(form, this._formValidArray);
+    });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
       this._validateForm();
 
-      if (this._formValid) {
+      if (allTrue(this._formValidArray)) {
         const formData = new FormData(form);
 
         const formDataObject = {};
@@ -139,86 +161,28 @@ class ItemView extends View {
         });
 
         handler(formDataObject);
+
+        resetForm('#formAddNewItem', 'input', this._formValidArray);
+
+        const id = getHash();
+
+        if (id) renderHandler(id);
       }
     });
   };
 
-  _validateForm = () => {
-    const regex = /^(?!\s+$).+/;
-
-    const form = document.querySelector('#formAddNewItem');
-    const inputs = Array.from(form.querySelectorAll('input'));
-
-    inputs.map((input) => {
-      this._validateInput(input, regex);
-    });
-  };
-
-  _validateInput = (input, regex) => {
-    const data = input.value;
-
-    if (!data) {
-      this._setInputValid(input, false);
-    }
-
-    if (regex.test(data)) {
-      if (this._formValid === null) {
-        this._formValid = true;
-      }
-      return;
-    } else this._setInputValid(input, false);
-
-    this._formValid = false;
-  };
-
-  _clearInputError = () => {
-    const form = document.querySelector('#formAddNewItem');
-    const inputs = Array.from(form.querySelectorAll('input'));
-
-    inputs.map((input) => this._setInputValid(input, true));
-    this._formValid = null;
-  };
-
-  _setInputValid = (input, status) => {
-    input.setAttribute('aria-invalid', !status);
-  };
-
-  _clearForm = () => {
-    const form = document.querySelector('#formAddNewItem');
-    const inputs = Array.from(form.querySelectorAll('input'));
-
-    clearForm(inputs);
-
-    this._formValid = null;
-  };
-
-  _monitorBackBtn = (handler) => {
+  _monitorBackBtn = () => {
     const btn = document.querySelector('#backBtn');
 
     btn.addEventListener('click', () => {
-      handler();
-      window.location.hash = '';
+      clearHash();
     });
   };
 
-  renderView = (handler, btnHandler, formHandler) => {
-    this._renderMarkUp(handler());
-    this._monitorBackBtn(btnHandler);
-    this._monitorForm(formHandler);
-  };
-
-  handleStart = (handler, btnHandler, formHandler) => {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (handler()) {
-        this.renderView(handler, btnHandler, formHandler);
-      }
-    });
-
-    window.addEventListener('hashchange', () => {
-      if (handler()) {
-        this.renderView(handler, btnHandler, formHandler);
-      }
-    });
+  addHandler = (data, formHandler, renderHandler) => {
+    this._renderMarkUp(data);
+    this._monitorForm(formHandler, renderHandler);
+    this._monitorBackBtn();
   };
 }
 
