@@ -7,6 +7,7 @@ import {
   allTrue,
   resetForm,
   scrollToTop,
+  isChecked,
 } from '../helpers';
 import View from './view';
 
@@ -58,12 +59,12 @@ class ItemView extends View {
             <button type="submit" class="py-2 md:py-3 max-[639px]:w-full md:px-5 bg-black text-white text-base md:text-lg px-4 rounded-md">Enter</button>
         </form>
 
-        <div class="flex flex-col justify-center sm:flex-row sm:items-start gap-4 sm:gap-6 md:gap-10 md:justify-between items-center p-6 rounded-t-[30px] sm:p-8 md:p-12 bg-[#F1F1F1]">
+        <div id="setItems" class="flex flex-col justify-center sm:flex-row sm:items-start gap-4 sm:gap-6 md:gap-10 md:justify-between items-center p-6 rounded-t-[30px] sm:p-8 md:p-12 bg-[#F1F1F1]">
             <div class="w-full sm:max-w-[400px]">
                 <h2 class="rounded-md mb-4 md:mb-6 text-lg md:text-xl font-normal bg-[#DCDCDC] p-2 md:p-3 text-center">
                 Tasks
                 </h2>
-                <ul class="flex flex-col gap-3 md:gap-4">
+                <ul data-list-type="task" class="flex flex-col gap-3 md:gap-4">
                     ${this._generateList(data.items, 'task')}               
                 </ul>
             </div>
@@ -72,11 +73,12 @@ class ItemView extends View {
                 <h2 class="rounded-md mb-4 md:mb-6 text-lg md:text-xl font-normal bg-[#DCDCDC] p-2 md:p-3 text-center">
                 Treats
                 </h2>
-                <ul class="flex flex-col gap-3 md:gap-4">
+                <ul data-list-type="treat" class="flex flex-col gap-3 md:gap-4">
                 ${this._generateList(data.items, 'treat')}              
                 </ul>
             </div>
         </div>
+
         <button id="backBtn" class="absolute right-4 top-6 sm:right-8 sm:top-10">
             <svg class="w-8 sm:w-10 aspect-square">
                 <use href="${icons}#icon-back"></use>
@@ -90,18 +92,19 @@ class ItemView extends View {
 
     if (data.length) {
       markup += data
-        .map((item) => {
+        .map((item, index) => {
           return `
-              <li class="rounded-md text-base bg-white text-left">
-                  <label class="group has-[input:checked]:line-through w-full px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
-                      <input ${
-                        item[type].completed ? 'checked' : ''
-                      }  type="checkbox" class="absolute opacity-0 w-0 h-0" />
-                      <div class="mr-2 md:mr-4 border overflow-hidden p-[2px] border-black w-4 md:w-5 rounded-full aspect-square inline-block">
-                          <div class="w-full aspect-square group-has-[input:checked]:bg-black rounded-full bg-white"></div>                                
-                      </div>
-                      ${item[type].content}
-                  </label>
+              <li class="relative group rounded-md text-base bg-white text-left">
+                <label for="${type}-item-${index}" class="group-has-[input:checked]:line-through w-full px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
+                  <div class="mr-2 md:mr-4 border overflow-hidden p-[2px] border-black w-4 md:w-5 rounded-full aspect-square inline-block">
+                    <div class="w-full aspect-square group-has-[input:checked]:bg-black rounded-full bg-white"></div>                                
+                  </div>
+                ${item[type].content}
+                </label>
+                <input
+                data-item-index="${index}" 
+                ${item[type].completed ? 'checked' : ''}  
+                type="checkbox" id="${type}-item-${index}" class="absolute opacity-0 w-0 h-0" />                     
               </li> `;
         })
         .join('');
@@ -179,10 +182,47 @@ class ItemView extends View {
     });
   };
 
-  addHandler = (data, formHandler, renderHandler) => {
+  _updateCheckedItem = (list, itemIndex, checked, handler) => {
+    const itemUpdate = {
+      type: list,
+      index: itemIndex,
+      status: checked,
+    };
+
+    handler(itemUpdate);
+  };
+
+  _monitorList = (listHandler, renderHandler) => {
+    const setItems = document.querySelector('#setItems');
+
+    setItems.addEventListener('click', (e) => {
+      const item = e.target.closest('input');
+
+      if (!item) return;
+
+      const listType = e.target.closest('ul').getAttribute('data-list-type');
+      const itemIndex = item.getAttribute('data-item-index');
+
+      if (!listType || !itemIndex) return;
+
+      this._updateCheckedItem(
+        listType,
+        itemIndex,
+        isChecked(item),
+        listHandler
+      );
+
+      const id = getHash();
+
+      if (id) renderHandler(id);
+    });
+  };
+
+  addHandler = (data, formHandler, listHandler, renderHandler) => {
     this._renderMarkUp(data);
     this._monitorForm(formHandler, renderHandler);
     this._monitorBackBtn();
+    this._monitorList(listHandler, renderHandler);
   };
 }
 

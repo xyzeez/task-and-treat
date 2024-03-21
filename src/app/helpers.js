@@ -79,3 +79,7 @@ export const scrollToTop = () => {
     behavior: 'smooth',
   });
 };
+
+export const isChecked = (item) => {
+  return item.checked;
+};

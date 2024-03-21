@@ -32,6 +32,10 @@ const controlSetsView = () => {
   SetsView.addHandler(user, sets, model.defineNewSet, controlSetsView);
 };
 
+const controlItemList = (data) => {
+  model.updateItemStatus(data);
+};
+
 const controlItemView = (id) => {
   const set = model.loadSetData(id);
 
@@ -41,7 +45,12 @@ const controlItemView = (id) => {
     return;
   }
 
-  ItemView.addHandler(set, model.defineNewItem, controlItemView);
+  ItemView.addHandler(
+    set,
+    model.defineNewItem,
+    controlItemList,
+    controlItemView
+  );
 };
 
 // Initialization

@@ -46,6 +46,22 @@ const _addNewItem = (item) => {
   setJSON(LOCAL_DATA_KEY, state);
 };
 
+const _setItemStatus = (type, index, status) => {
+  const currSet = getHash();
+
+  if (!currSet) return;
+
+  state.sets.forEach((set) => {
+    if (set.title === currSet) {
+      set.items[index][type].completed = status;
+    }
+  });
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
 // // Exported functions
 export const defineStateUser = (data) => {
   const { name } = data;
@@ -106,6 +122,12 @@ export const defineNewItem = (data) => {
   };
 
   _addNewItem(newItem);
+};
+
+export const updateItemStatus = (data) => {
+  const { type, index, status } = data;
+
+  _setItemStatus(type, index, status);
 };
 
 // Variables
