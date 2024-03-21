@@ -1,47 +1,53 @@
 import '../main.css';
+import { getHash, clearHash } from './helpers';
 import StartView from './views/startView';
 import SetsView from './views/setsView';
 import ItemView from './views/itemView';
 import * as model from './model';
 
-const controlStart = () => {
-  return model.loadState();
+// Functions
+const monitorHash = () => {
+  window.addEventListener('hashchange', () => {
+    controlApp();
+  });
 };
 
-const controlStartForm = (data) => {
-  model.updateState('user', data);
+const controlApp = () => {
+  const id = getHash();
+  const { active } = model.loadStateData();
 
-  SetsView.handleStart(controlStart, controlFormAddSet);
+  if (id) {
+    active ? controlItemView(id) : clearHash();
+  } else {
+    active ? controlSetsView() : controlStartView();
+  }
 };
 
-const controlItem = () => {
-  const id = window.location.hash.slice(1);
-
-  if (!id) return;
-
-  if (!model.loadItem(id)) return;
-
-  return model.loadItem(id);
+const controlStartView = () => {
+  StartView.addHandler(model.defineStateUser, controlSetsView);
 };
 
-const controlFormAddSet = (data) => {
-  model.addItem(data);
-  SetsView.handleStart(controlStart, controlFormAddSet);
+const controlSetsView = () => {
+  const { user, sets } = model.loadStateData();
+  SetsView.addHandler(user, sets, model.defineNewSet, controlSetsView);
 };
 
-const controlFormAddItem = (data) => {
-  model.addSetItem(data);
-  ItemView.renderView(controlItem, controlBackBtn, controlFormAddItem);
+const controlItemView = (id) => {
+  const set = model.loadSetData(id);
+
+  // TODO: Handle error for unavailable set of given id
+  if (!set) {
+    clearHash();
+    return;
+  }
+
+  ItemView.addHandler(set, model.defineNewItem, controlItemView);
 };
 
-const controlBackBtn = () => {
-  SetsView.handleStart(controlStart, controlFormAddSet);
-};
-
+// Initialization
 const init = () => {
-  StartView.handleStart(controlStart, controlStartForm);
-  SetsView.handleStart(controlStart, controlFormAddSet);
-  ItemView.handleStart(controlItem, controlBackBtn, controlFormAddItem);
+  controlApp();
+  monitorHash();
 };
 
 init();

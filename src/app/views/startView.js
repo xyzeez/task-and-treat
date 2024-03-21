@@ -1,4 +1,5 @@
 import icons from '../../../assets/icons.svg';
+import { validateInput, clearInputError, allTrue, resetForm } from '../helpers';
 import View from './view';
 
 class StartView extends View {
@@ -12,7 +13,7 @@ class StartView extends View {
                 <span class="block italic font-light text-3xl md:text-4xl">Don't just do</span>
                 Treat yourself
             </h1>
-            <form id="startForm" class="flex w-full relative has-[input[aria-invalid=true]]:pb-8 relative gap-2 flex-row items-center">
+            <form id="startForm" class="flex w-full has-[input[aria-invalid=true]]:pb-8 relative gap-2 flex-row items-center">
                 <div class="w-full">
                     <label class="sr-only">Enter your name:</label>
                     <input type="text" name="name" id="name" aria-invalid="" aria-errormessage="nameErrorMessage" placeholder="e.g. John Doe" class="peer py-2 px-4 md:py-4 md:px-8 text-base md:text-lg aria-[invalid=true]:animate-wiggle border-solid border-red aria-[invalid=true]:border w-full rounded-md" />
@@ -25,19 +26,30 @@ class StartView extends View {
         </div>
     </section>`;
 
-  _validateForm = (handler) => {
+  _validateForm = () => {
+    const regex = /^[a-zA-Z' -]+$/;
+
     const form = document.querySelector('#startForm');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.forEach((input) => {
+      validateInput(input, regex, this._formValidArray);
+    });
+  };
+
+  _monitorForm = (handler, renderHandler) => {
+    const form = document.querySelector('#startForm');
+
+    form.addEventListener('input', () => {
+      clearInputError(form, this._formValidArray);
+    });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      const formInput = form.querySelector('input');
+      this._validateForm();
 
-      const data = formInput.value;
-
-      if (!data) return;
-
-      if (/^[a-zA-Z' -]+$/.test(data)) {
+      if (allTrue(this._formValidArray)) {
         const formData = new FormData(form);
 
         const formDataObject = {};
@@ -46,24 +58,19 @@ class StartView extends View {
           formDataObject[key] = value;
         });
 
-        handler(formDataObject.name);
+        handler(formDataObject);
 
-        formInput.value = '';
-        return true;
+        resetForm('#startForm', 'input', this._formValidArray);
+
+        renderHandler();
       }
-
-      return false;
     });
   };
 
-  handleStart(handler, formHandler) {
-    const { active } = handler();
-
-    if (active) return;
-
+  addHandler = (formHandler, setsViewHandler) => {
     this._renderMarkUp();
-    this._validateForm(formHandler);
-  }
+    this._monitorForm(formHandler, setsViewHandler);
+  };
 }
 
 export default new StartView();

@@ -1,4 +1,115 @@
-import { getJSON, setJSON } from './helpers';
+import { LOCAL_DATA_KEY } from './config';
+import { getJSON, setJSON, convertToSlug, getHash } from './helpers';
+
+// Functions
+// // Internal functions
+const _updateCompletedSetsCount = () => {
+  state.sets.forEach((set) => {
+    set.completed = _countCompletedTasks(set);
+  });
+};
+
+const _countCompletedTasks = (set) => {
+  return set.items.reduce((acc, curr) => {
+    if (curr.task.completed) {
+      return acc + 1;
+    }
+    return acc;
+  }, 0);
+};
+
+const _activateState = () => {
+  state.active = true;
+};
+
+const _addNewSet = (set) => {
+  state.sets.push(set);
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
+const _addNewItem = (item) => {
+  const currSet = getHash();
+
+  if (!currSet) return;
+
+  state.sets.forEach((set) => {
+    if (set.title === currSet) {
+      set.items.push(item);
+    }
+  });
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
+// // Exported functions
+export const defineStateUser = (data) => {
+  const { name } = data;
+
+  state.user = name;
+
+  _activateState();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
+export const loadStateData = () => {
+  if (!state.active) return false;
+
+  return state;
+};
+
+export const loadSetData = (title) => {
+  if (!state.active) return false;
+
+  if (!title) return false;
+
+  let setData;
+
+  state.sets.forEach((set) => {
+    if (set.title === title) {
+      setData = set;
+    }
+  });
+
+  return setData;
+};
+
+export const defineNewSet = (data) => {
+  let { title, emoji, color } = data;
+
+  title = convertToSlug(title);
+
+  const newSet = {
+    title: title,
+    emoji: emoji,
+    color: color,
+    items: [],
+  };
+
+  _addNewSet(newSet);
+};
+
+export const defineNewItem = (data) => {
+  let { task, treat } = data;
+
+  task = task.trim();
+  treat = treat.trim();
+
+  const newItem = {
+    task: { content: `${task}`, completed: false },
+    treat: { content: `${treat}`, completed: false },
+  };
+
+  _addNewItem(newItem);
+};
+
+// Variables
+let state = {};
 
 const defaultState = {
   active: false,
@@ -149,101 +260,17 @@ const defaultState = {
   ],
 };
 
-const _setCompletedValue = (sets) => {
-  sets.map((set) => {
-    set.completed = _countCompletedTasks(set);
-  });
-};
-
-const _countCompletedTasks = (set) => {
-  const count = set.items.reduce((acc, curr) => {
-    if (curr.task.completed === true) {
-      return acc + 1;
-    } else {
-      return acc;
-    }
-  }, 0);
-
-  return count;
-};
-
-let state = {};
-
-export const loadState = () => {
-  return state;
-};
-
-export const updateState = (item, data) => {
-  state[item] = data;
-  state.active = true;
-  setJSON('state', state);
-};
-
-export const loadItem = (itemTitle) => {
-  let data = false;
-
-  if (!state.active) return data;
-
-  state.sets.map((item) => {
-    if (item.title === itemTitle) data = item;
-  });
-
-  return data;
-};
-
-export const addItem = (data) => {
-  let { title, emoji, color } = data;
-
-  title = _convertToSlug(title);
-
-  const newItem = {
-    title: title,
-    emoji: emoji,
-    color: color,
-    items: [],
-  };
-
-  state.sets.push(newItem);
-  _setCompletedValue(state.sets);
-  setJSON('state', state);
-};
-
-export const addSetItem = (data) => {
-  let { task, treat } = data;
-
-  task = task.trim();
-  treat = treat.trim();
-
-  const newItem = {
-    task: { content: `${task}`, completed: false },
-    treat: { content: `${treat}`, completed: false },
-  };
-
-  const currSet = window.location.hash.slice(1);
-
-  state.sets.map((set) => {
-    if (set.title === currSet) {
-      set.items.push(newItem);
-    }
-  });
-
-  _setCompletedValue(state.sets);
-  setJSON('state', state);
-};
-
-const _convertToSlug = (str) => {
-  return str.trim().toLowerCase().replace(/\s+/g, '-');
-};
-
+// Initialization
 const init = () => {
-  let stateData = getJSON('state');
+  let stateData = getJSON(LOCAL_DATA_KEY);
 
   if (!stateData) stateData = defaultState;
 
-  _setCompletedValue(stateData.sets);
-
   state = stateData;
-  setJSON('state', state);
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
 };
 
 init();
