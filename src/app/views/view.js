@@ -1,6 +1,9 @@
+import { scrollToTop } from '../helpers';
+
 export default class View {
   _containerElement = document.querySelector('main');
   _markup;
+  _formValidArray = [];
 
   _clearContainer = () => {
     this._containerElement.innerHTML = '';
@@ -9,13 +12,6 @@ export default class View {
   _renderMarkUp = () => {
     this._clearContainer();
     this._containerElement.innerHTML = this._markup;
-    this._scrollToTop();
-  };
-
-  _scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    scrollToTop();
   };
 }
