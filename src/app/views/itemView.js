@@ -16,11 +16,11 @@ class ItemView extends View {
     return `
       <section class="relative grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
 
-        <div class="flex flex-col gap-4 md:gap-6 px-4 pt-6 mb-8 md:mb-12">
+        <div class="grid grid-cols-[auto_auto] grid-rows-2 gap-4 md:gap-6 px-4 pt-6 mb-8 md:mb-12">
           <div class="flex flex-row items-center gap-4">
-            <span style="background-color: ${
-              data.color
-            };" class="aspect-square self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl w-12 min-[426px]:w-14 md:w-[70px] p-1 rounded-full text-white">
+            <span 
+            style="background-color: ${data.color};" 
+            class="aspect-square self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl w-12 min-[426px]:w-14 md:w-[70px] p-1 rounded-full text-white">
               ${data.emoji}
             </span>
             <div class="sm:flex sm:flex-row sm:items-center sm:gap-6 md:gap-10">
@@ -32,7 +32,30 @@ class ItemView extends View {
               </p>
             </div>
           </div>
-          <p class="text-base md:text-lg">
+          <nav class="relative ml-auto">
+            <button id="menuBtn" class="lg:hidden">              
+              <svg class="w-8 sm:w-10 aspect-square">
+                <use href="${icons}#icon-ellipsis"></use>
+              </svg>
+            </button>
+            <menu id="navMenu" class="z-[100] fixed ld:relative w-max right-4 top-6 flex-col items-start gap-2 bg-ashe text-lg font-medium p-2 rounded-md box-shadow-2 hidden lg:flex lg:flex-row lg:bg-[transparent] lg:shadow-none lg:gap-8 lg:items-center">
+              <li>
+                <button id="editBtn" class="p-1">Edit</button>
+              </li>
+              <li>
+                <button id="deleteBtn" class="p-1">Delete</button>
+              </li>
+              <li class="mt-1">
+                <button id="backBtn" class="flex flex-row items-center gap-2 py-2 max-[639px]:w-full  bg-black text-white font-normal pl-3 pr-4 rounded-md">
+                  <svg class="size-6">
+                    <use href="${icons}#icon-back"></use>
+                  </svg>
+                  <span>Go back</span>
+                </button>
+              </li>
+            </menu>
+          </nav>
+          <p class="col-start-1 col-end-3 text-base md:text-lg">
             Enter a new task and then a treat to go with it!
           </p>
         </div>
@@ -80,13 +103,41 @@ class ItemView extends View {
           </div>
         </div>
 
-        <button id="backBtn" class="absolute right-4 top-6 sm:right-8 sm:top-10">
-          <svg class="w-8 sm:w-10 aspect-square">
-            <use href="${icons}#icon-back"></use>
-          </svg>
-        </button>
+        <div id="menuOverlay" class="hidden absolute bg-black opacity-0 size-full lg:hidden"></div>
+
       </section>
                 `;
+  };
+
+  _showMenuOverlay = (control = true) => {
+    const overlay = document.querySelector('#menuOverlay');
+
+    if (control) {
+      overlay.classList.remove('hidden');
+      overlay.classList.add('block');
+      return;
+    }
+
+    overlay.classList.remove('block');
+    overlay.classList.add('hidden');
+  };
+
+  _monitorMenuBtn = () => {
+    const menuBtn = document.querySelector('#menuBtn');
+    const menu = document.querySelector('#navMenu');
+    const overlay = document.querySelector('#menuOverlay');
+
+    menuBtn.addEventListener('click', () => {
+      menu.classList.remove('hidden');
+      menu.classList.add('flex');
+      this._showMenuOverlay();
+    });
+
+    overlay.addEventListener('click', () => {
+      menu.classList.remove('flex');
+      menu.classList.add('hidden');
+      this._showMenuOverlay(false);
+    });
   };
 
   _generateList = (data, type) => {
@@ -129,6 +180,8 @@ class ItemView extends View {
     this._containerElement.innerHTML = this._generateMarkup(data);
     if (!update) scrollToTop();
   };
+
+  //
 
   _renderEmptyMarkUp = (type) => {
     return `
@@ -243,6 +296,7 @@ class ItemView extends View {
     update
   ) => {
     this._renderMarkUp(data, update);
+    this._monitorMenuBtn();
     this._monitorForm(formHandler, renderHandler);
     this._monitorBackBtn();
     this._monitorList(updateHandler, deleteHandler, renderHandler);
