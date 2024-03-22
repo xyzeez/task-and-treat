@@ -96,8 +96,7 @@ class ItemView extends View {
           return `
             <li data-item-index="${index}" class="group grid grid-cols-[1fr_24px] items-start gap-6 relative pl-4 pr-2 py-2 md:py-3 md:pl-5 md:pr-3 rounded-md text-base bg-white text-left">
               <label class="checkbox-wrapper">
-                <input 
-                data-item-index="${index}"
+                <input                
                 type="checkbox"
                 class="" 
                 ${item[type].completed ? 'checked' : ''}
@@ -192,16 +191,16 @@ class ItemView extends View {
     });
   };
 
-  _updateCheckedItem = (list, item, handler) => {
+  _updateCheckedItem = (list, listItem, checkbox, handler) => {
     const listType = list.getAttribute('data-list-type');
-    const itemIndex = item.getAttribute('data-item-index');
+    const itemIndex = listItem.getAttribute('data-item-index');
 
     if (!listType || !itemIndex) return;
 
     const itemUpdate = {
       type: listType,
       index: itemIndex,
-      status: isChecked(item),
+      status: isChecked(checkbox),
     };
 
     handler(itemUpdate);
@@ -212,13 +211,13 @@ class ItemView extends View {
 
     setItems.addEventListener('click', (e) => {
       const list = e.target.closest('ul');
-      const item = e.target.closest('input');
+      const listItem = e.target.closest('li');
+      const checkbox = e.target.closest('input');
 
       if (!list) return;
 
-      if (item) {
-        this._updateCheckedItem(list, item, listHandler);
-      }
+      if (checkbox)
+        this._updateCheckedItem(list, listItem, checkbox, listHandler);
 
       const id = getHash();
 
