@@ -94,18 +94,28 @@ class ItemView extends View {
       markup += data
         .map((item, index) => {
           return `
-              <li class="relative group rounded-md text-base bg-white text-left">
-                <label for="${type}-item-${index}" class="group-has-[input:checked]:line-through w-full px-4 py-2 md:py-3 md:px-5 text-base md:text-lg flex items-center">
-                  <div class="mr-2 md:mr-4 border overflow-hidden p-[2px] border-black w-4 md:w-5 rounded-full aspect-square inline-block">
-                    <div class="w-full aspect-square group-has-[input:checked]:bg-black rounded-full bg-white"></div>                                
-                  </div>
-                ${item[type].content}
-                </label>
-                <input
-                data-item-index="${index}" 
-                ${item[type].completed ? 'checked' : ''}  
-                type="checkbox" id="${type}-item-${index}" class="absolute opacity-0 w-0 h-0" />                     
-              </li> `;
+            <li data-item-index="${index}" class="group grid grid-cols-[1fr_24px] items-start gap-6 relative pl-4 pr-2 py-2 md:py-3 md:pl-5 md:pr-3 rounded-md text-base bg-white text-left">
+              <label class="checkbox-wrapper">
+                <input 
+                data-item-index="${index}"
+                type="checkbox"
+                class="" 
+                ${item[type].completed ? 'checked' : ''}
+                />
+                <div class="checkbox-content grid grid-cols-[auto_1fr] items-start gap-3">
+                  <span id="checkbox-span"></span>
+                  <span class="text-black font-medium group-has-[input:checked]:font-medium group-has-[input:checked]:text-opacity-70 group-has-[input:checked]:line-through text-base md:text-lg">
+                    ${item[type].content}
+                  </span>
+                </div>
+              </label>              
+              <button class="deleteBtn flex items-center justify-center size-[26px] text-[#334155] rounded-md p-1 hover:bg-[#fef2f2] hover:text-[#ef4444] group-has-[input:checked]:hidden">
+                <svg class="w-[26px] aspect-square ">
+                  <use href="${icons}#icon-delete"></use>
+                </svg>
+              </button>                     
+            </li>
+               `;
         })
         .join('');
     } else {
@@ -182,11 +192,16 @@ class ItemView extends View {
     });
   };
 
-  _updateCheckedItem = (list, itemIndex, checked, handler) => {
+  _updateCheckedItem = (list, item, handler) => {
+    const listType = list.getAttribute('data-list-type');
+    const itemIndex = item.getAttribute('data-item-index');
+
+    if (!listType || !itemIndex) return;
+
     const itemUpdate = {
-      type: list,
+      type: listType,
       index: itemIndex,
-      status: checked,
+      status: isChecked(item),
     };
 
     handler(itemUpdate);
@@ -196,21 +211,14 @@ class ItemView extends View {
     const setItems = document.querySelector('#setItems');
 
     setItems.addEventListener('click', (e) => {
+      const list = e.target.closest('ul');
       const item = e.target.closest('input');
 
-      if (!item) return;
+      if (!list) return;
 
-      const listType = e.target.closest('ul').getAttribute('data-list-type');
-      const itemIndex = item.getAttribute('data-item-index');
-
-      if (!listType || !itemIndex) return;
-
-      this._updateCheckedItem(
-        listType,
-        itemIndex,
-        isChecked(item),
-        listHandler
-      );
+      if (item) {
+        this._updateCheckedItem(list, item, listHandler);
+      }
 
       const id = getHash();
 
