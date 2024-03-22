@@ -19,7 +19,7 @@ class SetsView extends View {
             ${capitalizeFirstLetter(user)}!
           </h1>
           <div class="flex flex-col items-end gap-4 fixed md:relative md:bottom-0 bottom-[3%] md:right-0 right-[5%] text-white text-base">
-            <button class="btnAddNewSet bg-black rounded-xl">
+            <button id="btnAddNewSet-1" class="btnAddNewSet bg-black rounded-xl">
               <svg class="aspect-square w-12 md:w-16 p-2">
                 <use href="${icons}#icon-plus"></use>
               </svg>
@@ -29,7 +29,7 @@ class SetsView extends View {
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-row lg:flex-wrap gap-4">
           ${this._generateSets(data)}
-          <button class="btnAddNewSet flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] items-center justify-center rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-[#EAEAEA]">
+          <button id="btnAddNewSet-2" class="btnAddNewSet flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] items-center justify-center rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-[#EAEAEA]">
             <svg class="aspect-square w-16 sm:w-28 bg-[#DFDFDF] rounded-full p-2 sm:p-6 text-black">
               <use href="${icons}#icon-plus"></use>
             </svg>
@@ -201,9 +201,26 @@ class SetsView extends View {
     });
   };
 
+  _addBtnObserver = () => {
+    const toHide = document.querySelector('#btnAddNewSet-1');
+    const toObserve = document.querySelector('#btnAddNewSet-2');
+
+    const callback = (payload) => {
+      if (payload[0].intersectionRatio === 1) toHide.classList.add('hidden');
+      else toHide.classList.remove('hidden');
+    };
+
+    const options = { threshold: 1 };
+
+    const observer = new IntersectionObserver(callback, options);
+
+    observer.observe(toObserve);
+  };
+
   addHandler = (user, sets, handler, renderHandler, update) => {
     this._renderMarkUp(user, sets, update);
     this._monitorAddSetBtn(handler, renderHandler);
+    this._addBtnObserver();
   };
 }
 
