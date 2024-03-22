@@ -206,18 +206,27 @@ class ItemView extends View {
     handler(itemUpdate);
   };
 
-  _monitorList = (listHandler, renderHandler) => {
+  _deleteItem = (listItem, handler) => {
+    const itemIndex = listItem.getAttribute('data-item-index');
+
+    handler(itemIndex);
+  };
+
+  _monitorList = (updateHandler, deleteHandler, renderHandler) => {
     const setItems = document.querySelector('#setItems');
 
     setItems.addEventListener('click', (e) => {
       const list = e.target.closest('ul');
       const listItem = e.target.closest('li');
       const checkbox = e.target.closest('input');
+      const btn = e.target.closest('button');
 
       if (!list) return;
 
       if (checkbox)
-        this._updateCheckedItem(list, listItem, checkbox, listHandler);
+        this._updateCheckedItem(list, listItem, checkbox, updateHandler);
+
+      if (btn) this._deleteItem(listItem, deleteHandler);
 
       const id = getHash();
 
@@ -225,11 +234,17 @@ class ItemView extends View {
     });
   };
 
-  addHandler = (data, formHandler, listHandler, renderHandler) => {
+  addHandler = (
+    data,
+    formHandler,
+    updateHandler,
+    deleteHandler,
+    renderHandler
+  ) => {
     this._renderMarkUp(data);
     this._monitorForm(formHandler, renderHandler);
     this._monitorBackBtn();
-    this._monitorList(listHandler, renderHandler);
+    this._monitorList(updateHandler, deleteHandler, renderHandler);
   };
 }
 

@@ -62,6 +62,22 @@ const _setItemStatus = (type, index, status) => {
   setJSON(LOCAL_DATA_KEY, state);
 };
 
+const _deleteSetItem = (itemIndex) => {
+  const currSet = getHash();
+
+  state.sets.forEach((set) => {
+    if (set.title === currSet) {
+      if (itemIndex < 0 || itemIndex >= set.items.length) return;
+
+      set.items.splice(itemIndex, 1);
+    }
+  });
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
 // // Exported functions
 export const defineStateUser = (data) => {
   const { name } = data;
@@ -128,6 +144,12 @@ export const updateItemStatus = (data) => {
   const { type, index, status } = data;
 
   _setItemStatus(type, index, status);
+};
+
+export const deleteListItem = (itemIndex) => {
+  if (itemIndex < 0) return;
+
+  _deleteSetItem(itemIndex);
 };
 
 // Variables
