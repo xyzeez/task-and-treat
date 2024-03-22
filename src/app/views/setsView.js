@@ -47,11 +47,11 @@ class SetsView extends View {
         return `
           <a 
           href="#${set.title}" 
-          class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] bg-white">
-            <article class="flex p-3 min-[426px]:p-5 md:p-7 justify-between flex-col w-full">
+          class="flex w-full lg:max-w-[280px] box-shadow aspect-[1/0.89] rounded-2xl min-[426px]:rounded-3xl lg:rounded-[30px] bg-white">
+            <article class="flex p-3 min-[426px]:p-5 lg:p-7 justify-between flex-col w-full">
               <span 
               style="background-color: ${set.color}" 
-              class="aspect-square self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl w-10 min-[426px]:w-14 md:w-[70px] p-1 rounded-full text-white">
+              class="self-end grid place-content-center text-2xl min-[426px]:text-3xl md:text-4xl size-10 min-[426px]:w-14 md:size-14 lg:w-[70px] p-1 rounded-full text-white">
                 ${set.emoji}
               </span>
               <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
