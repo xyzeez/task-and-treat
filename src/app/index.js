@@ -27,9 +27,9 @@ const controlStartView = () => {
   StartView.addHandler(model.defineStateUser, controlSetsView);
 };
 
-const controlSetsView = () => {
+const controlSetsView = (update = false) => {
   const { user, sets } = model.loadStateData();
-  SetsView.addHandler(user, sets, model.defineNewSet, controlSetsView);
+  SetsView.addHandler(user, sets, model.defineNewSet, controlSetsView, update);
 };
 
 const controlItemStatusList = (data) => {
@@ -40,7 +40,7 @@ const controlDeleteItemList = (itemIndex) => {
   model.deleteListItem(itemIndex);
 };
 
-const controlItemView = (id) => {
+const controlItemView = (id, update = false) => {
   const set = model.loadSetData(id);
 
   // TODO: Handle error for unavailable set of given id
@@ -54,7 +54,8 @@ const controlItemView = (id) => {
     model.defineNewItem,
     controlItemStatusList,
     controlDeleteItemList,
-    controlItemView
+    controlItemView,
+    update
   );
 };
 

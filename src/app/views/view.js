@@ -9,9 +9,9 @@ export default class View {
     this._containerElement.innerHTML = '';
   };
 
-  _renderMarkUp = () => {
+  _renderMarkUp = (update = false) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._markup;
-    scrollToTop();
+    if (!update) scrollToTop();
   };
 }

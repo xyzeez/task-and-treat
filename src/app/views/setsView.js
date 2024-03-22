@@ -69,10 +69,10 @@ class SetsView extends View {
     return markup;
   };
 
-  _renderMarkUp = (user, data) => {
+  _renderMarkUp = (user, data, update = false) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._generateMarkup(user, data);
-    scrollToTop();
+    if (!update) scrollToTop();
   };
 
   _renderOverlayMarkUp = () => {
@@ -163,7 +163,7 @@ class SetsView extends View {
 
         resetForm('#formAddSet', 'input[type=text]', this._formValidArray);
 
-        renderHandler();
+        renderHandler(true);
       }
     });
   };
@@ -201,8 +201,8 @@ class SetsView extends View {
     });
   };
 
-  addHandler = (user, sets, handler, renderHandler) => {
-    this._renderMarkUp(user, sets);
+  addHandler = (user, sets, handler, renderHandler, update) => {
+    this._renderMarkUp(user, sets, update);
     this._monitorAddSetBtn(handler, renderHandler);
   };
 }

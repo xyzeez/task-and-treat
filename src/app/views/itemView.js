@@ -124,10 +124,10 @@ class ItemView extends View {
     return markup;
   };
 
-  _renderMarkUp = (data) => {
+  _renderMarkUp = (data, update) => {
     this._clearContainer();
     this._containerElement.innerHTML = this._generateMarkup(data);
-    scrollToTop();
+    if (!update) scrollToTop();
   };
 
   _renderEmptyMarkUp = (type) => {
@@ -178,7 +178,7 @@ class ItemView extends View {
 
         const id = getHash();
 
-        if (id) renderHandler(id);
+        if (id) renderHandler(id, true);
       }
     });
   };
@@ -230,7 +230,7 @@ class ItemView extends View {
 
       const id = getHash();
 
-      if (id) renderHandler(id);
+      if (id) renderHandler(id, true);
     });
   };
 
@@ -239,9 +239,10 @@ class ItemView extends View {
     formHandler,
     updateHandler,
     deleteHandler,
-    renderHandler
+    renderHandler,
+    update
   ) => {
-    this._renderMarkUp(data);
+    this._renderMarkUp(data, update);
     this._monitorForm(formHandler, renderHandler);
     this._monitorBackBtn();
     this._monitorList(updateHandler, deleteHandler, renderHandler);
