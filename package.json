@@ -1,5 +1,5 @@
 {
-  "name": "task & treat",
+  "name": "task_and_treat",
   "version": "1.0.0",
   "description": "a todo list where you have to add a treat after each task",
   "main": "index.js",
