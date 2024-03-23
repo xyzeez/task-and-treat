@@ -56,6 +56,12 @@ const controlLoadCurrSetID = () => {
   return model.loadCurrSetData();
 };
 
+const controlDeleteSet = (setID) => {
+  if (!setID) return false;
+
+  model.deleteSet(setID);
+};
+
 const controlItemView = (id, update = false) => {
   const set = model.loadSetData(id);
 
@@ -73,6 +79,7 @@ const controlItemView = (id, update = false) => {
     controlLoadSetData,
     controlEditSet,
     controlLoadCurrSetID,
+    controlDeleteSet,
     controlItemView,
     update
   );

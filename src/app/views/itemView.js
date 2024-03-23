@@ -13,6 +13,25 @@ import {
 import View from './view';
 
 class ItemView extends View {
+  _deleteSetModalMarkup = `
+    <div id="formEditSet" class="relative bg-white w-full max-w-[500px] px-4 py-6 sm:px-8 sm:py-8 flex flex-col items-center gap-6 rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] h-fit">
+      <div class="flex flex-col items-center gap-5">
+        <svg class="size-12 text-red">
+          <use href="${icons}#icon-warning"></use>
+        </svg>
+        <p class="text-center">Are you sure you want to delete this set? This action cannot be undone.</p>
+        <div class="flex flex-row gap-4 items-center">
+          <button type="submit" id="deleteSetBtn" class="py-2 md:py-3 max-[639px]:w-full md:px-5 bg-red text-white text-base md:text-lg px-4 rounded-md">
+            Delete
+          </button>
+          <button type="submit" id="deleteSetModalCloseBtn" class="py-2 md:py-3 max-[639px]:w-full md:px-5 bg-black text-white text-base md:text-lg px-4 rounded-md">
+            Cancel
+          </button>      
+        </div>        
+      </div>
+    </div> 
+          `;
+
   _generateEditFormMarkUp = (data) => {
     const { title, emoji, color } = data;
 
@@ -85,7 +104,7 @@ class ItemView extends View {
                 <button id="editSetBtn" class="p-1">Edit</button>
               </li>
               <li>
-                <button id="deleteSetBtn" class="p-1">Delete</button>
+                <button id="menuDeleteSetBtn" class="p-1">Delete</button>
               </li>
               <li class="mt-1">
                 <button id="backBtn" class="flex flex-row items-center gap-2 py-2 max-[639px]:w-full  bg-black text-white font-normal pl-3 pr-4 rounded-md">
@@ -167,7 +186,7 @@ class ItemView extends View {
   _monitorMenuBtn = () => {
     const menuBtn = document.querySelector('#menuBtn');
     const editSetBtn = document.querySelector('#editSetBtn');
-    const deleteSetBtn = document.querySelector('#deleteSetBtn');
+    const menuDeleteSetBtn = document.querySelector('#menuDeleteSetBtn');
     const menu = document.querySelector('#navMenu');
     const overlay = document.querySelector('#menuOverlay');
 
@@ -177,7 +196,7 @@ class ItemView extends View {
       this._showMenuOverlay();
     });
 
-    [editSetBtn, deleteSetBtn, overlay].forEach((element) => {
+    [editSetBtn, menuDeleteSetBtn, overlay].forEach((element) => {
       element.addEventListener('click', () => {
         menu.classList.remove('flex');
         menu.classList.add('hidden');
@@ -226,8 +245,6 @@ class ItemView extends View {
     this._containerElement.innerHTML = this._generateMarkup(data);
     if (!update) scrollToTop();
   };
-
-  //
 
   _renderEmptyMarkUp = (type) => {
     return `
@@ -413,6 +430,29 @@ class ItemView extends View {
     });
   };
 
+  _monitorDeleteSetBtn = (currSetHandler, deleteSetHandler) => {
+    const btn = document.querySelector('#deleteSetBtn');
+
+    btn.addEventListener('click', () => {
+      const currSet = currSetHandler();
+
+      if (!currSet) return;
+
+      deleteSetHandler(currSet);
+      clearHash();
+    });
+  };
+
+  _monitorMenuDeleteBtn = (currSetHandler, deleteSetHandler) => {
+    const btn = document.querySelector('#menuDeleteSetBtn');
+
+    btn.addEventListener('click', () => {
+      this._renderOverlay(this._deleteSetModalMarkup);
+      this._monitorDeleteSetBtn(currSetHandler, deleteSetHandler);
+      this._monitorOverlayClose('deleteSetModalCloseBtn');
+    });
+  };
+
   addHandler = (
     data,
     formHandler,
@@ -421,6 +461,7 @@ class ItemView extends View {
     setDataLoadHandler,
     editSetHandler,
     currSetHandler,
+    deleteSetHandler,
     renderHandler,
     update
   ) => {
@@ -440,6 +481,7 @@ class ItemView extends View {
       editSetHandler,
       renderHandler
     );
+    this._monitorMenuDeleteBtn(currSetHandler, deleteSetHandler);
   };
 }
 

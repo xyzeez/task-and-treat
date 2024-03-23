@@ -86,8 +86,28 @@ const _updateSet = (data) => {
       set.title = data.title;
       set.emoji = data.emoji;
       set.color = data.color;
+
+      state.currSetID = set.title;
     }
   });
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
+const _deleteStateSet = (setID) => {
+  if (!setID) return false;
+
+  const toDelete = setID;
+
+  state.sets.forEach((set, index) => {
+    if (set.title === toDelete) {
+      state.sets.splice(index, 1);
+    }
+  });
+
+  state.currSetID = '';
 
   _updateCompletedSetsCount();
 
@@ -192,6 +212,12 @@ export const updateCurrSet = (data) => {
 
   _updateSet(setNewInfo);
   _updateCurrSetID(setNewInfo);
+};
+
+export const deleteSet = (setID) => {
+  if (!setID) return false;
+
+  _deleteStateSet(setID);
 };
 
 // Variables
