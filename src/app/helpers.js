@@ -83,3 +83,7 @@ export const scrollToTop = () => {
 export const isChecked = (item) => {
   return item.checked;
 };
+
+export const clearElement = (element) => {
+  element.innerHTML = '';
+};
