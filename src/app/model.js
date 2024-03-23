@@ -1,5 +1,5 @@
 import { LOCAL_DATA_KEY } from './config';
-import { getJSON, setJSON, convertToSlug, getHash } from './helpers';
+import { getJSON, setJSON, convertToSlug } from './helpers';
 
 // Functions
 // // Internal functions
@@ -18,6 +18,12 @@ const _countCompletedTasks = (set) => {
   }, 0);
 };
 
+const _updateCurrSetID = (data) => {
+  const { title } = data;
+
+  if (title) state.currSetID = title;
+};
+
 const _activateState = () => {
   state.active = true;
 };
@@ -31,12 +37,10 @@ const _addNewSet = (set) => {
 };
 
 const _addNewItem = (item) => {
-  const currSet = getHash();
-
-  if (!currSet) return;
+  if (!state.currSetID) return;
 
   state.sets.forEach((set) => {
-    if (set.title === currSet) {
+    if (set.title === state.currSetID) {
       set.items.push(item);
     }
   });
@@ -47,12 +51,10 @@ const _addNewItem = (item) => {
 };
 
 const _setItemStatus = (type, index, status) => {
-  const currSet = getHash();
-
-  if (!currSet) return;
+  if (!state.currSetID) return;
 
   state.sets.forEach((set) => {
-    if (set.title === currSet) {
+    if (set.title === state.currSetID) {
       set.items[index][type].completed = status;
     }
   });
@@ -63,13 +65,27 @@ const _setItemStatus = (type, index, status) => {
 };
 
 const _deleteSetItem = (itemIndex) => {
-  const currSet = getHash();
-
   state.sets.forEach((set) => {
-    if (set.title === currSet) {
+    if (set.title === state.currSetID) {
       if (itemIndex < 0 || itemIndex >= set.items.length) return;
 
       set.items.splice(itemIndex, 1);
+    }
+  });
+
+  _updateCompletedSetsCount();
+
+  setJSON(LOCAL_DATA_KEY, state);
+};
+
+const _updateSet = (data) => {
+  if (!state.currSetID) return;
+
+  state.sets.forEach((set) => {
+    if (set.title === state.currSetID) {
+      set.title = data.title;
+      set.emoji = data.emoji;
+      set.color = data.color;
     }
   });
 
@@ -108,7 +124,16 @@ export const loadSetData = (title) => {
     }
   });
 
+  if (!setData) return false;
+
+  _updateCurrSetID(setData);
+
+  // TODO: Manage when setData is undefined due to unknown title value
   return setData;
+};
+
+export const loadCurrSetData = () => {
+  return state.currSetID;
 };
 
 export const defineNewSet = (data) => {
@@ -152,12 +177,30 @@ export const deleteListItem = (itemIndex) => {
   _deleteSetItem(itemIndex);
 };
 
+export const updateCurrSet = (data) => {
+  if (!data) return;
+
+  let { title, emoji, color } = data;
+
+  title = convertToSlug(title);
+
+  const setNewInfo = {
+    title: title,
+    emoji: emoji,
+    color: color,
+  };
+
+  _updateSet(setNewInfo);
+  _updateCurrSetID(setNewInfo);
+};
+
 // Variables
 let state = {};
 
 const defaultState = {
   active: false,
   user: '',
+  currSetID: '',
   sets: [
     {
       title: 'weight-loss',

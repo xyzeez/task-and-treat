@@ -40,6 +40,22 @@ const controlDeleteItemList = (itemIndex) => {
   model.deleteListItem(itemIndex);
 };
 
+const controlLoadSetData = (title) => {
+  if (!title) return;
+
+  return model.loadSetData(title);
+};
+
+const controlEditSet = (data) => {
+  if (!data) return;
+
+  model.updateCurrSet(data);
+};
+
+const controlLoadCurrSetID = () => {
+  return model.loadCurrSetData();
+};
+
 const controlItemView = (id, update = false) => {
   const set = model.loadSetData(id);
 
@@ -54,6 +70,9 @@ const controlItemView = (id, update = false) => {
     model.defineNewItem,
     controlItemStatusList,
     controlDeleteItemList,
+    controlLoadSetData,
+    controlEditSet,
+    controlLoadCurrSetID,
     controlItemView,
     update
   );

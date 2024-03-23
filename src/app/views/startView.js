@@ -30,6 +30,8 @@ class StartView extends View {
   _validateForm = () => {
     const regex = /^[a-zA-Z' -]+$/;
 
+    this._clearFormValidationArray();
+
     const form = document.querySelector('#startForm');
     const inputs = Array.from(form.querySelectorAll('input'));
 

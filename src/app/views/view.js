@@ -49,4 +49,8 @@ export default class View {
       this._removeOverlay();
     });
   };
+
+  _clearFormValidationArray = () => {
+    this._formValidArray = [];
+  };
 }

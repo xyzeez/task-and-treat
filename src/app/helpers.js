@@ -55,12 +55,20 @@ export const convertToSlug = (str) => {
   return str.trim().toLowerCase().replace(/\s+/g, '-');
 };
 
+export const convertToText = (slug) => {
+  return slug.replace(/-/g, ' ');
+};
+
 export const getHash = () => {
   const hash = window.location.hash.slice(1);
 
   if (!hash) return false;
 
   return hash;
+};
+
+export const setHash = (value) => {
+  window.location.hash = value;
 };
 
 export const clearHash = () => {

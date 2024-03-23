@@ -6,11 +6,12 @@ import {
   resetForm,
   capitalizeFirstLetter,
   scrollToTop,
+  convertToText,
 } from '../helpers';
 import View from './view';
 
 class SetsView extends View {
-  _formMarkUp = `
+  _formAddSetMarkUp = `
     <form id="formAddSet" class="relative bg-white w-full max-w-[500px] px-4 py-6 sm:px-8 sm:py-8 flex flex-col items-center gap-6 rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] h-fit">
       <h2 class="font-medium self-start text-2xl sm:text-3xl">Add a new set</h2>
       <div class="flex flex-col gap-5">
@@ -38,7 +39,7 @@ class SetsView extends View {
           Enter
         </button>
       </div>
-      <button id="formCloseBtn" class="absolute right-4 top-6 sm:right-8 sm:top-8">
+      <button id="formAddSetCloseBtn" class="absolute right-4 top-6 sm:right-8 sm:top-8">
         <svg class="w-8 sm:w-10 aspect-square">
           <use href="${icons}#icon-close"></use>
         </svg>
@@ -62,7 +63,7 @@ class SetsView extends View {
                 ${set.emoji}
               </span>
               <h2 class="lowercase mt-auto mb-1 first-letter:capitalize text-lg min-[426px]:text-xl md:text-2xl font-semibold">
-                  ${set.title.replace(/-/g, ' ')}
+                  ${convertToText(set.title)}
               </h2>
               <p class="font-medium text-xs min-[425px]:text-sm md:text-lg">
                 ${set.completed}/${set.items.length} done
@@ -115,6 +116,8 @@ class SetsView extends View {
     const titleRegex = /^(?!\s+$).+/;
     const emojiRegex = /^[\p{Emoji}]{1}$/u;
 
+    this._clearFormValidationArray();
+
     const form = document.querySelector('#formAddSet');
     const inputs = Array.from(form.querySelectorAll('input'));
 
@@ -163,9 +166,9 @@ class SetsView extends View {
     const btns = Array.from(document.querySelectorAll('.btnAddNewSet'));
     btns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        this._renderOverlay(this._formMarkUp);
+        this._renderOverlay(this._formAddSetMarkUp);
         this._monitorForm(handler, renderHandler);
-        this._monitorOverlayClose('formCloseBtn');
+        this._monitorOverlayClose('formAddSetCloseBtn');
       });
     });
   };

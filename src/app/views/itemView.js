@@ -1,6 +1,6 @@
 import icons from '../../../assets/icons.svg';
 import {
-  getHash,
+  setHash,
   clearHash,
   validateInput,
   clearInputError,
@@ -8,10 +8,52 @@ import {
   resetForm,
   scrollToTop,
   isChecked,
+  convertToText,
 } from '../helpers';
 import View from './view';
 
 class ItemView extends View {
+  _generateEditFormMarkUp = (data) => {
+    const { title, emoji, color } = data;
+
+    return `
+      <form id="formEditSet" class="relative bg-white w-full max-w-[500px] px-4 py-6 sm:px-8 sm:py-8 flex flex-col items-center gap-6 rounded-2xl min-[426px]:rounded-3xl md:rounded-[30px] h-fit">
+        <h2 class="font-medium self-start text-2xl sm:text-3xl">Edit set Information</h2>
+        <div class="flex flex-col gap-5">
+          <div class="relative has-[input[aria-invalid=true]]:pb-6">
+            <label class="font-light text-lg sm:text-2xl">Set Title:</label>
+            <input type="text" name="title" value="${convertToText(title)}"
+             id="title" aria-invalid="" aria-errormessage="titleErrorMessage" placeholder="e.g Weight loss" class="peer mt-2 py-2 px-4 md:py-3 md:px-5 text-base md:text-lg bg-[#F0F0F0] aria-[invalid=true]:animate-wiggle border-solid border-red aria-[invalid=true]:border w-full rounded-md" />
+            <p id="titleErrorMessage" aria-live="polite" class="hidden absolute text-red text-sm bottom-0 peer-aria-[invalid=true]:block">
+              Please enter a valid title
+            </p>
+          </div>
+          <div class="flex flex-row gap-4">
+            <div class="relative has-[input[aria-invalid=true]]:pb-6">
+              <label class="font-light text-lg sm:text-2xl">Set Emoji:</label>
+              <input type="text" name="emoji" value="${emoji}" id="emoji" aria-invalid="" aria-errormessage="emojiErrorMessage" placeholder="e.g 💪" class="peer py-2 px-4 mt-2 md:py-3 md:px-5 text-base md:text-lg bg-[#F0F0F0] aria-[invalid=true]:animate-wiggle border-solid border-red aria-[invalid=true]:border w-full rounded-md" />
+              <p id="emojiErrorMessage" aria-live="polite" class="hidden absolute text-red text-sm bottom-0 peer-aria-[invalid=true]:block">
+                Please enter a valid emoji
+              </p>
+            </div>
+            <div class="relative w-[45%]">
+              <label class="font-light text-lg sm:text-2xl">Set BG:</label>
+              <input type="color" name="color" value="${color}" id="color" placeholder="e.g Weight loss" class="mt-2 h-10 md:h-[3.5rem] w-full rounded-md" />
+            </div>
+          </div>
+          <button type="submit" class="py-2 md:py-3 max-[639px]:w-full md:px-5 bg-black text-white text-base md:text-lg px-4 rounded-md">
+            Enter
+          </button>
+        </div>
+        <button id="formEditSetCloseBtn" class="absolute right-4 top-6 sm:right-8 sm:top-8">
+          <svg class="w-8 sm:w-10 aspect-square">
+            <use href="${icons}#icon-close"></use>
+          </svg>
+        </button>
+      </form> 
+          `;
+  };
+
   _generateMarkup = (data) => {
     return `
       <section class="relative grid mx-auto w-full max-w-[1100px] grid-rows-[auto_auto_1fr] sm:p-4 sm:pb-0">
@@ -40,10 +82,10 @@ class ItemView extends View {
             </button>
             <menu id="navMenu" class="z-[100] fixed ld:relative w-max right-4 top-6 flex-col items-start gap-2 bg-ashe text-lg font-medium p-2 rounded-md box-shadow-2 hidden lg:flex lg:flex-row lg:bg-[transparent] lg:shadow-none lg:gap-8 lg:items-center">
               <li>
-                <button id="editBtn" class="p-1">Edit</button>
+                <button id="editSetBtn" class="p-1">Edit</button>
               </li>
               <li>
-                <button id="deleteBtn" class="p-1">Delete</button>
+                <button id="deleteSetBtn" class="p-1">Delete</button>
               </li>
               <li class="mt-1">
                 <button id="backBtn" class="flex flex-row items-center gap-2 py-2 max-[639px]:w-full  bg-black text-white font-normal pl-3 pr-4 rounded-md">
@@ -124,6 +166,8 @@ class ItemView extends View {
 
   _monitorMenuBtn = () => {
     const menuBtn = document.querySelector('#menuBtn');
+    const editSetBtn = document.querySelector('#editSetBtn');
+    const deleteSetBtn = document.querySelector('#deleteSetBtn');
     const menu = document.querySelector('#navMenu');
     const overlay = document.querySelector('#menuOverlay');
 
@@ -133,10 +177,12 @@ class ItemView extends View {
       this._showMenuOverlay();
     });
 
-    overlay.addEventListener('click', () => {
-      menu.classList.remove('flex');
-      menu.classList.add('hidden');
-      this._showMenuOverlay(false);
+    [editSetBtn, deleteSetBtn, overlay].forEach((element) => {
+      element.addEventListener('click', () => {
+        menu.classList.remove('flex');
+        menu.classList.add('hidden');
+        this._showMenuOverlay(false);
+      });
     });
   };
 
@@ -193,7 +239,7 @@ class ItemView extends View {
     `;
   };
 
-  _validateForm = () => {
+  _validateAddNewItemForm = () => {
     const regex = /^(?!\s+$).+/;
 
     const form = document.querySelector('#formAddNewItem');
@@ -204,7 +250,7 @@ class ItemView extends View {
     });
   };
 
-  _monitorForm = (handler, renderHandler) => {
+  _monitorAddNewItemForm = (handler, currSetHandler, renderHandler) => {
     const form = document.querySelector('#formAddNewItem');
 
     form.addEventListener('input', () => {
@@ -214,7 +260,7 @@ class ItemView extends View {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      this._validateForm();
+      this._validateAddNewItemForm();
 
       if (allTrue(this._formValidArray)) {
         const formData = new FormData(form);
@@ -229,7 +275,7 @@ class ItemView extends View {
 
         resetForm('#formAddNewItem', 'input', this._formValidArray);
 
-        const id = getHash();
+        const id = currSetHandler();
 
         if (id) renderHandler(id, true);
       }
@@ -265,7 +311,12 @@ class ItemView extends View {
     handler(itemIndex);
   };
 
-  _monitorList = (updateHandler, deleteHandler, renderHandler) => {
+  _monitorList = (
+    updateHandler,
+    deleteHandler,
+    currSetHandler,
+    renderHandler
+  ) => {
     const setItems = document.querySelector('#setItems');
 
     setItems.addEventListener('click', (e) => {
@@ -281,9 +332,84 @@ class ItemView extends View {
 
       if (btn) this._deleteItem(listItem, deleteHandler);
 
-      const id = getHash();
+      const id = currSetHandler();
 
       if (id) renderHandler(id, true);
+    });
+  };
+
+  _validateEditSetForm = () => {
+    const titleRegex = /^(?!\s+$).+/;
+    const emojiRegex = /^[\p{Emoji}]{1}$/u;
+
+    this._clearFormValidationArray();
+
+    const form = document.querySelector('#formEditSet');
+    const inputs = Array.from(form.querySelectorAll('input'));
+
+    inputs.forEach((input) => {
+      if (input.name === 'title') {
+        validateInput(input, titleRegex, this._formValidArray);
+      }
+
+      if (input.name === 'emoji') {
+        validateInput(input, emojiRegex, this._formValidArray);
+      }
+    });
+  };
+
+  _monitorEditSetForm = (handler, currSetHandler, renderHandler) => {
+    const form = document.querySelector('#formEditSet');
+
+    form.addEventListener('input', () => {
+      clearInputError(form, this._formValidArray);
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      this._validateEditSetForm();
+
+      if (allTrue(this._formValidArray)) {
+        const formData = new FormData(form);
+
+        const formDataObject = {};
+
+        formData.forEach((value, key) => {
+          formDataObject[key] = value;
+        });
+
+        handler(formDataObject);
+
+        resetForm('#formEditSet', 'input[type=text]', this._formValidArray);
+
+        const id = currSetHandler();
+
+        setHash(id);
+      }
+    });
+  };
+
+  _monitorEditSetBtn = (
+    currSetHandler,
+    setDataHandler,
+    editSetHandler,
+    renderHandler
+  ) => {
+    const btn = document.querySelector('#editSetBtn');
+
+    btn.addEventListener('click', () => {
+      const currSet = currSetHandler();
+
+      if (!currSet) return;
+
+      const setData = setDataHandler(currSet);
+
+      const editFormMarkup = this._generateEditFormMarkUp(setData);
+
+      this._renderOverlay(editFormMarkup);
+      this._monitorEditSetForm(editSetHandler, currSetHandler, renderHandler);
+      this._monitorOverlayClose('formEditSetCloseBtn');
     });
   };
 
@@ -291,15 +417,29 @@ class ItemView extends View {
     data,
     formHandler,
     updateHandler,
-    deleteHandler,
+    deleteItemHandler,
+    setDataLoadHandler,
+    editSetHandler,
+    currSetHandler,
     renderHandler,
     update
   ) => {
     this._renderMarkUp(data, update);
     this._monitorMenuBtn();
-    this._monitorForm(formHandler, renderHandler);
+    this._monitorAddNewItemForm(formHandler, currSetHandler, renderHandler);
     this._monitorBackBtn();
-    this._monitorList(updateHandler, deleteHandler, renderHandler);
+    this._monitorList(
+      updateHandler,
+      deleteItemHandler,
+      currSetHandler,
+      renderHandler
+    );
+    this._monitorEditSetBtn(
+      currSetHandler,
+      setDataLoadHandler,
+      editSetHandler,
+      renderHandler
+    );
   };
 }
 
